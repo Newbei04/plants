@@ -14,7 +14,7 @@ $stmt->bind_param("ssi", $scientificName, $description, $id);
 
 if ($stmt->execute()) {
     echo "<html><head><script>alert('Updated Successfully');</script></head></html>";
-    echo "<meta http-equiv='refresh' content='0; url=edit_notherbal.php'>";
+    echo "<meta http-equiv='refresh' content='0; url=manage_not_herbal.php'>";
 } else {
     echo "<html><head><script>alert('ERROR! Update Operation Unsuccessful');</script></head></html>";
     echo "Error: " . $stmt->error;

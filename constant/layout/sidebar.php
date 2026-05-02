@@ -28,6 +28,7 @@ include('../constant/connect.php');
                     <ul aria-expanded="false" class="collapse">
                         <li><a href="new_not_herbal.php">Add Not Herbal</a></li>
                         <li><a href="manage_not_herbal.php">Manage Not Herbal</a></li>
+                        <li><a href="activate_not_herbal.php">Archived Not Herbal</a></li>
                     </ul>
                 </li>
 

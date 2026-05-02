@@ -14,7 +14,7 @@ include('../constant/check.php');
             <nav class="navbar top-navbar navbar-expand-md navbar-light">
                 <!-- Logo -->
                 <div class="navbar-header">
-                    <a class="navbar-brand" target="_blank" href="#">
+                    <a class="navbar-brand" target="_blank" href="dashboard.php">
                         <!-- Logo icon -->
                          <?php
              $sql_header_logo = "select * from manage_website"; 

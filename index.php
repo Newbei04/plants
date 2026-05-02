@@ -21,7 +21,7 @@
   <!--==================== HEADER ====================-->
   <header class="header" id="header">
     <nav class="nav container">
-      <a href="#" class="nav__logo">
+      <a href="index.php" class="nav__logo">
         <img src="assets2/img/logo1.png" alt="" style="width: 60px" /> Our Farm
         Republic
       </a>

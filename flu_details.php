@@ -1,5 +1,5 @@
 <?php
-include('../constant/connect.php');
+include(__DIR__ .'/constant/connect.php');
 // $servername = "localhost";
 // $username = "root";
 // $password = "";

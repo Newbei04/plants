@@ -1,79 +1,105 @@
 <?php
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+include(__DIR__ . '/../constant/connect.php');
+
+function showError($message)
+{
+    $safe = htmlspecialchars($message, ENT_QUOTES);
+    echo "<!DOCTYPE html>
+<html>
+<head><meta charset='UTF-8'></head>
+<body>
+<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '{$safe}'
+    }).then(function() {
+        window.location.href = 'new_herbal.php';
+    });
+</script>
+</body>
+</html>";
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    include('../phpqrcode/qrlib.php');
+    include(__DIR__ . '/../phpqrcode/qrlib.php');
 
     // INPUTS
-    $scientificName = $_POST['scientificname'];
-    $meaning = $_POST['meaning'];
-    $canUseTo = $_POST['canuseto'];
-    $howToUse = $_POST['howtouse'];
-    $trivia = $_POST['trivia'];
+    $scientificName = $_POST['scientificname'] ?? '';
+    $meaning        = $_POST['meaning']        ?? '';
+    $canUseTo       = $_POST['canuseto']       ?? '';
+    $howToUse       = $_POST['howtouse']       ?? '';
+    $trivia         = $_POST['trivia']         ?? '';
 
-    // ✔ FIX: set default value to avoid SQL error
     $value = 0;
 
+    // DB CHECK
+    if (!$con) {
+        showError("Database connection failed.");
+    }
+
     // FILE UPLOAD
-    $targetDirectory = "../uploads/";
+    if (!isset($_FILES["image"]) || $_FILES["image"]["error"] !== UPLOAD_ERR_OK) {
+        showError("No image uploaded.");
+    }
+
+    $targetDirectory = __DIR__ . "/../uploads/";
 
     if (!is_dir($targetDirectory)) {
         mkdir($targetDirectory, 0777, true);
     }
 
-    $targetFile = $targetDirectory . basename($_FILES["image"]["name"]);
+    $targetFile    = $targetDirectory . basename($_FILES["image"]["name"]);
     $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-    // CHECK IMAGE
-    $check = getimagesize($_FILES["image"]["tmp_name"]);
-    if ($check === false) {
-        die("File is not an image.");
+    // VALIDATION
+    if (!getimagesize($_FILES["image"]["tmp_name"])) {
+        showError("File is not an image.");
     }
 
     if ($_FILES["image"]["size"] > 5000000) {
-        die("File is too large.");
+        showError("File is too large.");
     }
 
     if (!in_array($imageFileType, ["jpg", "jpeg", "png", "gif"])) {
-        die("Only JPG, JPEG, PNG & GIF allowed.");
+        showError("Only JPG, JPEG, PNG & GIF allowed.");
     }
 
-    // UPLOAD FILE
     if (!move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
-        die("Upload failed.");
+        showError("Upload failed.");
     }
 
-    // DB CONNECTION
-    // $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
-
-    if ($con->connect_error) {
-        die("Connection failed: " . $con->connect_error);
-    }
-
-    // ✔ CHECK DUPLICATE SCIENTIFIC NAME
+    // CHECK DUPLICATE
     $checkStmt = $con->prepare("SELECT id FROM herbal_details WHERE scientific_name = ?");
+    if (!$checkStmt) {
+        showError("Query preparation failed.");
+    }
+
     $checkStmt->bind_param("s", $scientificName);
     $checkStmt->execute();
     $checkStmt->store_result();
 
     if ($checkStmt->num_rows > 0) {
-        die("Scientific name already exists!");
+        showError("Scientific name already exists!");
     }
     $checkStmt->close();
 
-    // ✔ INSERT DATA
+    // INSERT
     $stmt = $con->prepare("INSERT INTO herbal_details 
         (scientific_name, meaning, can_use_to, how_to_use, trivia, image, value) 
         VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     if (!$stmt) {
-        die("Prepare failed: " . $con->error);
+        showError("Insert prepare failed: " . $con->error);
     }
 
     $stmt->bind_param(
-        "sssssss",
+        "ssssssi",
         $scientificName,
         $meaning,
         $canUseTo,
@@ -83,33 +109,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $value
     );
 
-    if ($stmt->execute()) {
-
-        $herbalId = $stmt->insert_id;
-
-        // QR CODE PATH
-        $qrFileName = "qr_" . $herbalId . ".png";
-        $qrFilePath = "../qrcodes/" . $qrFileName;
-
-        if (!is_dir("../qrcodes/")) {
-            mkdir("../qrcodes/", 0777, true);
-        }
-
-        // GENERATE QR
-        QRcode::png($herbalId, $qrFilePath, 'L', 4, 2);
-
-        // UPDATE QR PATH
-        $update = $con->prepare("UPDATE herbal_details SET qr_code = ? WHERE id = ?");
-        $update->bind_param("si", $qrFilePath, $herbalId);
-        $update->execute();
-
-        // REDIRECT
-        header("Location: manage_herbal.php");
-        exit();
-    } else {
-        echo "Insert error: " . $stmt->error;
+    if (!$stmt->execute()) {
+        showError("Insert failed: " . $stmt->error);
     }
 
-    $stmt->close();
-    $con->close();
+    $herbalId = $stmt->insert_id;
+
+    // QR
+    $qrDir = __DIR__ . "/../qrcodes/";
+    if (!is_dir($qrDir)) {
+        mkdir($qrDir, 0777, true);
+    }
+
+    $qrFileName = "qr_" . $herbalId . ".png";
+    $qrFilePath = $qrDir . $qrFileName;
+
+    QRcode::png($herbalId, $qrFilePath, 'L', 4, 2);
+
+    // SAVE QR PATH (relative)
+    $dbQrPath = "qrcodes/" . $qrFileName;
+
+    $update = $con->prepare("UPDATE herbal_details SET qr_code = ? WHERE id = ?");
+    if ($update) {
+        $update->bind_param("si", $dbQrPath, $herbalId);
+        $update->execute();
+    }
+
+    // SUCCESS
+    echo "<!DOCTYPE html>
+<html>
+<head><meta charset='UTF-8'></head>
+<body>
+<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Herbal added successfully!'
+    }).then(function() {
+        window.location.href = 'manage_herbal.php';
+    });
+</script>
+</body>
+</html>";
 }

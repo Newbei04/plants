@@ -107,10 +107,10 @@ if (!$result) {
                                                     <a href="javascript:void(0);"
                                                         class="action-btn delete-btn"
                                                         data-id="<?php echo $row['id']; ?>">
-                                                        <button type="button" class="btn btn-danger">
-                                                            <i class="fa fa-trash"></i>
+                                                        <button type="button" class="btn btn-warning">
+                                                            <i class="fa fa-archive"></i>
                                                         </button>
-                                                        <span class="hover-text">Delete</span>
+                                                        <span class="hover-text">Archive</span>
                                                     </a>
                                                 </div>
 
@@ -151,12 +151,12 @@ if (!$result) {
 
             Swal.fire({
                 title: "Are you sure?",
-                text: "This herbal record will be marked as deleted.",
+                text: "This not herbal record will be marked as archived.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, delete it!"
+                confirmButtonText: "Yes, archive it!"
             }).then((result) => {
 
                 if (result.isConfirmed) {
@@ -171,8 +171,8 @@ if (!$result) {
                         .then(() => {
 
                             Swal.fire({
-                                title: "Deleted!",
-                                text: "Herbal record has been removed.",
+                                title: "Archived!",
+                                text: "Not herbal record has been archived.",
                                 icon: "success"
                             }).then(() => {
                                 location.reload();

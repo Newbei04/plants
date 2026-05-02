@@ -22,7 +22,7 @@ if (isset($_GET['id'])) {
     }
 } else {
     // Redirect to the page where you list all the records if no ID is provided.
-    header("Location: list_not_herbal.php");
+    header("Location: manage_not_herbal.php");
     exit();
 }
 
@@ -47,7 +47,7 @@ if (isset($_GET['id'])) {
                 <div class="card">
                     <div class="card-body">
                         <div class="input-states">
-                            <form class="form-horizontal" action="update_notherbal.php" method="post"
+                            <form class="form-horizontal" action="update_not_herbal.php" method="post"
                                 enctype="multipart/form-data">
                                 <input type="hidden" name="id" value="<?php echo $id; ?>">
 
