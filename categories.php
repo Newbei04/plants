@@ -1,5 +1,5 @@
 <?php
-include('../constant/connect.php');
+include('./constant/connect.php');
 // Assuming you have a database connection
 // $servername = "localhost";
 // $username = "root";
