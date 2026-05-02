@@ -1,14 +1,15 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "herbalinformation";
+include('../constant/connect.php');
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "herbalinformation";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// $conn = new mysqli($servername, $username, $password, $dbname);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// if ($conn->connect_error) {
+//     die("Connection failed: " . $conn->connect_error);
+// }
 
 // Check if the 'id' parameter is set in the URL
 if (isset($_GET['id'])) {
@@ -16,12 +17,12 @@ if (isset($_GET['id'])) {
 
     // Fetch details from the not_herbal_details table for the specific not herbal
     $sqlnotHerbalDetail = "SELECT * FROM not_herbal_details WHERE id = $notherbal_id";
-    $resultnotHerbalDetail = $conn->query($sqlnotHerbalDetail);
+    $resultnotHerbalDetail = $con->query($sqlnotHerbalDetail);
 
     if ($resultnotHerbalDetail) {
         $notherbalDetail = $resultnotHerbalDetail->fetch_assoc();
     } else {
-        echo "Error: " . $conn->error;
+        echo "Error: " . $con->error;
     }
 } else {
     echo "Not Herbal ID not provided.";
@@ -29,7 +30,7 @@ if (isset($_GET['id'])) {
 }
 
 // Close the database connection
-$conn->close();
+$con->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">

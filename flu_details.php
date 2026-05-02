@@ -1,13 +1,14 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "herbalinformation";
+include('../constant/connect.php');
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "herbalinformation";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// $conn = new mysqli($servername, $username, $password, $dbname);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($con->connect_error) {
+    die("Connection failed: " . $con->connect_error);
 }
 
 // Check if the 'id' parameter is set in the URL
@@ -16,12 +17,12 @@ if (isset($_GET['id'])) {
 
     // Fetch details from the flucategories table for the specific category
     $sqlCategoryDetail = "SELECT `id`, `scientific_name`, `herbal_plant` FROM `flucategories` WHERE id = $category_id";
-    $resultCategoryDetail = $conn->query($sqlCategoryDetail);
+    $resultCategoryDetail = $con->query($sqlCategoryDetail);
 
     if ($resultCategoryDetail) {
         $categoryDetail = $resultCategoryDetail->fetch_assoc();
     } else {
-        echo "Error: " . $conn->error;
+        echo "Error: " . $con->error;
     }
 } else {
     echo "Category ID not provided.";
@@ -29,7 +30,7 @@ if (isset($_GET['id'])) {
 }
 
 // Close the database connection
-$conn->close();
+$con->close();
 ?>
 
 <!DOCTYPE html>

@@ -1,4 +1,7 @@
-<?php session_start(); ?>
+<?php 
+session_start();
+include('../constant/connect.php');
+?>
 <?php include('../constant/layout/head.php'); ?>
 <?php include('../constant/layout/header.php'); ?>
 <?php include('../constant/layout/sidebar.php'); ?>
@@ -53,15 +56,15 @@ include('../constant/connect.php');
                             <div class="qr-container">
                                 <?php
                                 if (isset($_GET['id'])) {
-                                    $conn = mysqli_connect("localhost", "root", "", "herbalinformation");
+                                    // $conn = mysqli_connect("localhost", "root", "", "herbalinformation");
 
-                                    if (!$conn) {
-                                        die("Connection failed: " . mysqli_connect_error());
-                                    }
+                                    // if (!$conn) {
+                                    //     die("Connection failed: " . mysqli_connect_error());
+                                    // }
 
                                     $id = $_GET['id'];
                                     $sql = "SELECT qrcode FROM not_herbal_details WHERE id = $id";
-                                    $result = mysqli_query($conn, $sql);
+                                    $result = mysqli_query($con, $sql);
 
                                     if ($result) {
                                         $row = mysqli_fetch_assoc($result);
@@ -69,10 +72,10 @@ include('../constant/connect.php');
 
                                         echo '<img src="' . $qrPath . '" alt="QR Code">';
                                     } else {
-                                        echo "Error fetching QR code path: " . mysqli_error($conn);
+                                        echo "Error fetching QR code path: " . mysqli_error($con);
                                     }
 
-                                    mysqli_close($conn);
+                                    mysqli_close($con);
                                 } else {
                                     echo "Herbal ID not provided.";
                                 }

@@ -1,6 +1,6 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -46,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // DB CONNECTION
-    $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
+    // $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
 
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+    if ($con->connect_error) {
+        die("Connection failed: " . $con->connect_error);
     }
 
     // ✔ CHECK DUPLICATE SCIENTIFIC NAME
-    $checkStmt = $conn->prepare("SELECT id FROM herbal_details WHERE scientific_name = ?");
+    $checkStmt = $con->prepare("SELECT id FROM herbal_details WHERE scientific_name = ?");
     $checkStmt->bind_param("s", $scientificName);
     $checkStmt->execute();
     $checkStmt->store_result();
@@ -64,12 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkStmt->close();
 
     // ✔ INSERT DATA
-    $stmt = $conn->prepare("INSERT INTO herbal_details 
+    $stmt = $con->prepare("INSERT INTO herbal_details 
         (scientific_name, meaning, can_use_to, how_to_use, trivia, image, value) 
         VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     if (!$stmt) {
-        die("Prepare failed: " . $conn->error);
+        die("Prepare failed: " . $con->error);
     }
 
     $stmt->bind_param(
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         QRcode::png($herbalId, $qrFilePath, 'L', 4, 2);
 
         // UPDATE QR PATH
-        $update = $conn->prepare("UPDATE herbal_details SET qr_code = ? WHERE id = ?");
+        $update = $con->prepare("UPDATE herbal_details SET qr_code = ? WHERE id = ?");
         $update->bind_param("si", $qrFilePath, $herbalId);
         $update->execute();
 
@@ -111,5 +111,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt->close();
-    $conn->close();
+    $con->close();
 }

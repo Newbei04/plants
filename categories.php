@@ -1,19 +1,20 @@
 <?php
+include('../constant/connect.php');
 // Assuming you have a database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "herbalinformation";
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "herbalinformation";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// $conn = new mysqli($servername, $username, $password, $dbname);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($con->connect_error) {
+    die("Connection failed: " . $con->connect_error);
 }
 
 // Fetch data from the flucategories table
 $sqlFluCategories = "SELECT id, scientific_name, herbal_plant FROM flucategories";
-$resultFluCategories = $conn->query($sqlFluCategories);
+$resultFluCategories = $con->query($sqlFluCategories);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,7 +117,7 @@ $resultFluCategories = $conn->query($sqlFluCategories);
                     <?php
                 }
             } else {
-                echo "Error: " . $conn->error;
+                echo "Error: " . $con->error;
             }
             ?>
         </div>

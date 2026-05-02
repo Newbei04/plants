@@ -1,14 +1,15 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "herbalinformation";
+include('../constant/connect.php');
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "herbalinformation";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// $conn = new mysqli($servername, $username, $password, $dbname);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// if ($conn->connect_error) {
+//     die("Connection failed: " . $conn->connect_error);
+// }
 
 // Check if the 'id' parameter is set in the URL
 if (isset($_GET['id'])) {
@@ -16,7 +17,7 @@ if (isset($_GET['id'])) {
 
     // Check if the scanned QR code is for a herbal
     $sqlHerbal = "SELECT * FROM herbal_details WHERE id = $id";
-    $resultHerbal = $conn->query($sqlHerbal);
+    $resultHerbal = $con->query($sqlHerbal);
 
     if ($resultHerbal->num_rows > 0) {
         $detailType = 'herbal';
@@ -24,7 +25,7 @@ if (isset($_GET['id'])) {
     } else {
         // If not herbal, fetch details from the not_herbal_details table
         $sqlNotHerbal = "SELECT * FROM not_herbal_details WHERE id = $id";
-        $resultNotHerbal = $conn->query($sqlNotHerbal);
+        $resultNotHerbal = $con->query($sqlNotHerbal);
 
         if ($resultNotHerbal->num_rows > 0) {
             $detailType = 'not_herbal';
@@ -40,7 +41,7 @@ if (isset($_GET['id'])) {
 }
 
 // Close the database connection
-$conn->close();
+$con->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">

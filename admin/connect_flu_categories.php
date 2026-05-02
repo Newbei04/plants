@@ -1,19 +1,20 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+include('../constant/connect.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $scientificName = $_POST['scientificname'];
     $herbalPlants = $_POST['herbal_plant'] ?? "";
 
     // Database connection
-    $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+    // $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
+    if ($con->connect_error) {
+        die("Connection failed: " . $con->connect_error);
     } else {
         // Prepare the SQL insert statement for flucategories
-        $stmt = $conn->prepare("INSERT INTO flucategories (scientific_name, herbal_plant) VALUES (?, ?)");
+        $stmt = $con->prepare("INSERT INTO flucategories (scientific_name, herbal_plant) VALUES (?, ?)");
         if (!$stmt) {
-            die("Prepare failed: " . $conn->error);
+            die("Prepare failed: " . $con->error);
         }
 
         // Bind parameters to the prepared statement
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Close the statement and database connection
         $stmt->close();
-        $conn->close();
+        $con->close();
     }
 }
 ?>

@@ -1,22 +1,23 @@
 <?php
+include('../constant/connect.php');
 // Assuming you have a database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "herbalinformation";
+// $servername = "localhost";
+// $username = "root";
+// $password = "";
+// $dbname = "herbalinformation";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// $conn = new mysqli($servername, $username, $password, $dbname);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// if ($conn->connect_error) {
+//     die("Connection failed: " . $conn->connect_error);
+// }
 
 // Fetch data from both herbal_details and not_herbal_details tables
 $sqlHerbal = "SELECT id, scientific_name, image FROM herbal_details";
-$resultHerbal = $conn->query($sqlHerbal);
+$resultHerbal = $con->query($sqlHerbal);
 
 $sqlNotHerbal = "SELECT id, scientific_name, image FROM not_herbal_details";
-$resultNotHerbal = $conn->query($sqlNotHerbal);
+$resultNotHerbal = $con->query($sqlNotHerbal);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,7 +130,7 @@ $resultNotHerbal = $conn->query($sqlNotHerbal);
                     <?php
                 }
             } else {
-                echo "Error: " . $conn->error;
+                echo "Error: " . $con->error;
             }
             ?>
         </div>

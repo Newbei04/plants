@@ -1,7 +1,7 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+include('../constant/connect.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     include('../phpqrcode/qrlib.php');
@@ -40,13 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // DB connection
-    $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+    // $conn = new mysqli('localhost', 'root', '', 'herbalinformation');
+    if ($con->connect_error) {
+        die("Connection failed: " . $con->connect_error);
     }
 
     // INSERT DATA (WITH value = 0)
-    $stmt = $conn->prepare("INSERT INTO not_herbal_details 
+    $stmt = $con->prepare("INSERT INTO not_herbal_details 
         (scientific_name, description, image, value) 
         VALUES (?, ?, ?, ?)");
 
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         QRcode::png($notHerbalId, $qrFilePath, 'L', 4, 2);
 
         // UPDATE QR PATH
-        $stmt2 = $conn->prepare("UPDATE not_herbal_details SET qrcode = ? WHERE id = ?");
+        $stmt2 = $con->prepare("UPDATE not_herbal_details SET qrcode = ? WHERE id = ?");
         $stmt2->bind_param("si", $qrFilePath, $notHerbalId);
         $stmt2->execute();
 
@@ -77,5 +77,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt->close();
-    $conn->close();
+    $con->close();
 }
