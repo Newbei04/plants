@@ -1,13 +1,15 @@
 <?php
-$host = "localhost"; // Host name 
-$username = "root"; // Mysql username 
-$password = ""; // Mysql password 
-$db_name = "herbalinformation"; // Database name 
 
-// Connect to server and select databse.
+// Load .env file manually
+$env = parse_ini_file(__DIR__ . '/.env');
+
+$host = getenv('DB_HOST');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASS');
+$db_name = getenv('DB_NAME');
+
 $con = mysqli_connect($host, $username, $password, $db_name);
-// Check connection
+
 if (!$con) {
-    echo "Failed to connect to MySQL: " . mysqli_connect_error($con);
+    die("Failed to connect to MySQL: " . mysqli_connect_error());
 }
-?>
