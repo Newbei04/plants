@@ -27,15 +27,15 @@ function showError($message)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $scientificName = $_POST['scientificname'] ?? '';
-    $herbalPlant    = $_POST['herbal_plant']   ?? '';
+    $scientificName = trim($_POST['scientificname'] ?? '');
+    $herbalPlants   = $_POST['herbal_plant'] ?? [];
 
     if (empty($scientificName)) {
         showError("Scientific name is required.");
     }
 
-    if (empty($herbalPlant)) {
-        showError("Please select a herbal plant.");
+    if (empty($herbalPlants) || !is_array($herbalPlants)) {
+        showError("Please select at least one herbal plant.");
     }
 
     if (!$con) {
@@ -56,13 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $checkStmt->close();
 
+    // Implode array into comma-separated string
+    $herbalPlantString = implode(',', $herbalPlants);
+
     // INSERT
     $stmt = $con->prepare("INSERT INTO flucategories (scientific_name, herbal_plant) VALUES (?, ?)");
     if (!$stmt) {
         showError("Prepare failed: " . $con->error);
     }
 
-    $stmt->bind_param("ss", $scientificName, $herbalPlant);
+    $stmt->bind_param("ss", $scientificName, $herbalPlantString);
 
     if (!$stmt->execute()) {
         showError("Insert failed: " . $stmt->error);

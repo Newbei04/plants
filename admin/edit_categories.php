@@ -19,6 +19,11 @@ if (isset($_GET['id'])) {
         header("Location: manage_categories.php");
         exit();
     }
+
+    $scientificName = $row['scientific_name'];
+
+    // Explode the saved comma-separated string back into an array
+    $savedPlants = explode(',', $row['herbal_plant']);
 } else {
     header("Location: manage_categories.php");
     exit();
@@ -52,7 +57,7 @@ if (isset($_GET['id'])) {
                                         <label class="col-sm-3 control-label">Scientific Name:</label>
                                         <div class="col-sm-9">
                                             <input type="text" name="scientificname" class="form-control"
-                                                value="<?php echo htmlspecialchars($row['scientific_name']); ?>" required>
+                                                value="<?php echo htmlspecialchars($scientificName); ?>" required>
                                         </div>
                                     </div>
                                 </div>
@@ -61,24 +66,39 @@ if (isset($_GET['id'])) {
                                     <div class="row">
                                         <label class="col-sm-3 control-label">Select Herbal Plant:</label>
                                         <div class="col-sm-9">
-                                            <select name="herbal_plant" class="form-control" required>
-                                                <option value="">-- Select Herbal Plant --</option>
+
+                                            <!-- Search box -->
+                                            <input type="text" id="searchPlant" class="form-control mb-2" placeholder="Search plant...">
+
+                                            <!-- Scrollable checkbox list -->
+                                            <div id="plantCheckboxList" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
                                                 <?php
                                                 $query         = "SELECT scientific_name FROM herbal_details ORDER BY scientific_name ASC";
                                                 $result_herbal = mysqli_query($con, $query);
 
                                                 if ($result_herbal && mysqli_num_rows($result_herbal) > 0) {
                                                     while ($row_herbal = mysqli_fetch_assoc($result_herbal)) {
-                                                        $val      = htmlspecialchars($row_herbal['scientific_name']);
-                                                        // Pre-select the plant that was previously saved
-                                                        $selected = ($row_herbal['scientific_name'] === $row['herbal_plant']) ? 'selected' : '';
-                                                        echo "<option value=\"{$val}\" {$selected}>{$val}</option>";
+                                                        $val     = htmlspecialchars($row_herbal['scientific_name']);
+                                                        // Pre-check boxes that were previously saved
+                                                        $checked = in_array($row_herbal['scientific_name'], $savedPlants) ? 'checked' : '';
+                                                        echo '
+                                                        <div class="plant-item form-check mb-1">
+                                                            <input class="form-check-input plant-checkbox" type="checkbox" name="herbal_plant[]" value="' . $val . '" id="plant_' . $val . '" ' . $checked . '>
+                                                            <label class="form-check-label" for="plant_' . $val . '">' . $val . '</label>
+                                                        </div>';
                                                     }
                                                 } else {
-                                                    echo '<option value="" disabled>No herbal plants available</option>';
+                                                    echo '<p class="text-muted">No herbal plants available.</p>';
                                                 }
                                                 ?>
-                                            </select>
+                                            </div>
+
+                                            <!-- Select All / Deselect All -->
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-sm btn-secondary" id="selectAll">Select All</button>
+                                                <button type="button" class="btn btn-sm btn-secondary" id="deselectAll">Deselect All</button>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -95,3 +115,28 @@ if (isset($_GET['id'])) {
 </div>
 
 <?php include('../constant/layout/footer.php'); ?>
+
+<script>
+    // Search/filter checkboxes
+    document.getElementById('searchPlant').addEventListener('keyup', function() {
+        const search = this.value.toLowerCase();
+        document.querySelectorAll('.plant-item').forEach(function(item) {
+            const label = item.querySelector('label').textContent.toLowerCase();
+            item.style.display = label.includes(search) ? '' : 'none';
+        });
+    });
+
+    // Select All
+    document.getElementById('selectAll').addEventListener('click', function() {
+        document.querySelectorAll('.plant-checkbox').forEach(function(cb) {
+            cb.checked = true;
+        });
+    });
+
+    // Deselect All
+    document.getElementById('deselectAll').addEventListener('click', function() {
+        document.querySelectorAll('.plant-checkbox').forEach(function(cb) {
+            cb.checked = false;
+        });
+    });
+</script>

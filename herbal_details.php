@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ .'/constant/connect.php');
+include(__DIR__ . '/constant/connect.php');
 // $servername = "localhost";
 // $username = "root";
 // $password = "";
@@ -74,10 +74,6 @@ $con->close();
             align-items: start;
             gap: 40px;
         }
-
-        /* .img-card{
-    width: 40%;
-} */
 
         .img-card img {
             width: 100%;
@@ -210,7 +206,7 @@ $con->close();
                 width: 100%;
             }
 
-            echo "# product-details-page-html-css-js">>README.md .product-info p {
+            echo "#product-details-page-html-css-js">>README.md .product-info p {
                 width: 100%;
             }
 
@@ -248,6 +244,9 @@ $con->close();
                     </li>
                     <li class="nav__item">
                         <a href="camera.php" class="nav__link">Camera</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="howtouse.php" class="nav__link">How to Use</a>
                     </li>
                     <li class="nav__item">
                         <a href="about.php" class="nav__link ">About Us</a>
@@ -298,7 +297,18 @@ $con->close();
                 <br>
                 <p>Can Use To:</p>
                 <p>
-                    <?php echo $herbalDetail['can_use_to'] ?>
+                    <!-- <?php echo $herbalDetail['can_use_to'] ?> -->
+                    <?php
+                    $uses = explode(',', $herbalDetail['can_use_to']);
+                    echo '<ul style="list-style-type: disc; margin-left: 1.5rem; margin-top: 5px;">';
+                    foreach ($uses as $use) {
+                        $use = trim($use);
+                        if ($use !== '') {
+                            echo '<li style="color: #424551; margin-bottom: 4px;">' . htmlspecialchars($use) . '</li>';
+                        }
+                    }
+                    echo '</ul>';
+                    ?>
                 </p>
                 <br>
                 <p>How to Use:</p>

@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ .'/constant/connect.php');
+include(__DIR__ . '/constant/connect.php');
 // $servername = "localhost";
 // $username = "root";
 // $password = "";
@@ -11,16 +11,44 @@ if ($con->connect_error) {
     die("Connection failed: " . $con->connect_error);
 }
 
-// Check if the 'id' parameter is set in the URL
+// if (isset($_GET['id'])) {
+//     $category_id = $_GET['id'];
+
+//     $sqlCategoryDetail = "SELECT `id`, `scientific_name`, `herbal_plant` FROM `flucategories` WHERE id = $category_id";
+//     $resultCategoryDetail = $con->query($sqlCategoryDetail);
+
+//     if ($resultCategoryDetail) {
+//         $categoryDetail = $resultCategoryDetail->fetch_assoc();
+//     } else {
+//         echo "Error: " . $con->error;
+//     }
+// } else {
+//     echo "Category ID not provided.";
+//     exit();
+// }
+
 if (isset($_GET['id'])) {
     $category_id = $_GET['id'];
 
-    // Fetch details from the flucategories table for the specific category
     $sqlCategoryDetail = "SELECT `id`, `scientific_name`, `herbal_plant` FROM `flucategories` WHERE id = $category_id";
     $resultCategoryDetail = $con->query($sqlCategoryDetail);
 
     if ($resultCategoryDetail) {
         $categoryDetail = $resultCategoryDetail->fetch_assoc();
+
+        // Explode the comma-separated herbal plants into an array
+        $plants = explode(',', $categoryDetail['herbal_plant']);
+
+        // Trim each plant name and wrap in quotes for SQL IN clause
+        $plantsEscaped = array_map(function ($plant) use ($con) {
+            return "'" . $con->real_escape_string(trim($plant)) . "'";
+        }, $plants);
+
+        $plantsIn = implode(',', $plantsEscaped); // e.g. 'Plant A','Plant B'
+
+        // Fetch only matched herbal plants
+        $sqlHerbal = "SELECT id, scientific_name, image FROM herbal_details WHERE scientific_name IN ($plantsIn) AND value='0'";
+        $resultHerbal = $con->query($sqlHerbal);
     } else {
         echo "Error: " . $con->error;
     }
@@ -29,7 +57,6 @@ if (isset($_GET['id'])) {
     exit();
 }
 
-// Close the database connection
 $con->close();
 ?>
 
@@ -40,13 +67,10 @@ $con->close();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!--=============== FAVICON ===============-->
     <link rel="shortcut icon" href="assets2/img/logo1.png" type="image/x-icon" />
 
-    <!--=============== REMIX ICONS ===============-->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet" />
 
-    <!--=============== CSS ===============-->
     <link rel="stylesheet" href="assets2/css/styles.css" />
 
 
@@ -227,7 +251,6 @@ $con->close();
 </head>
 
 <body>
-    <!--==================== HEADER ====================-->
     <header class="header" id="header">
         <nav class="nav container">
             <a href="#" class="nav__logo">
@@ -241,14 +264,17 @@ $con->close();
                         <a href="index.php" class="nav__link ">Home</a>
                     </li>
                     <li class="nav__item">
-                        <a href="library.php" class="nav__link active-link">Library</a>
+                        <a href="library.php" class="nav__link">Library</a>
                     </li>
 
                     <li class="nav__item">
-                        <a href="categories.php" class="nav__link">Category</a>
+                        <a href="categories.php" class="nav__link  active-link">Category</a>
                     </li>
                     <li class="nav__item">
                         <a href="camera.php" class="nav__link">Camera</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="howtouse.php" class="nav__link">How to Use</a>
                     </li>
                     <li class="nav__item">
                         <a href="about.php" class="nav__link ">About Us</a>
@@ -280,16 +306,33 @@ $con->close();
 
         <!-- Right side -->
         <div class="product-info">
-            <h3>
-                <?php echo $categoryDetail['scientific_name']; ?>
+            <h3 style="font-size: 14px;">
+                <?php echo htmlspecialchars($categoryDetail['scientific_name']); ?>
             </h3>
             <br>
             <div>
                 <p>Herbal Plants:</p>
-                <p>
-                    <?php echo $categoryDetail['herbal_plant']; ?>
-                </p>
-
+                <div class="product__container grid" id="productContainer">
+                    <?php
+                    if ($resultHerbal && $resultHerbal->num_rows > 0) {
+                        while ($row = $resultHerbal->fetch_assoc()) {
+                    ?>
+                            <article class="product__card herbal">
+                                <img src="uploads/<?php echo $row['image']; ?>" width="100" alt="" class="product__img" />
+                                <h3 class="product__title">
+                                    <?php echo htmlspecialchars($row['scientific_name']); ?>
+                                </h3>
+                                <a href="herbal_details.php?id=<?php echo $row['id']; ?>" class="button--flex product__button">
+                                    <i class="ri-eye-line"></i>
+                                </a>
+                            </article>
+                    <?php
+                        }
+                    } else {
+                        echo "<p>No matching herbal plants found.</p>";
+                    }
+                    ?>
+                </div>
             </div>
         </div>
     </section>

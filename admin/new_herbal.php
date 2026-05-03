@@ -35,14 +35,14 @@
                                     <div class="row">
                                         <label class="col-sm-3 control-label">Image:</label>
                                         <div class="col-sm-9">
-                                            <input type="hidden" name="MAX_FILE_SIZE" value="2097152" />
+                                            <!-- <input type="hidden" name="MAX_FILE_SIZE" value="2097152" /> -->
                                             <input type="file" id="imageInput" name="image"
                                                 class="form-control-file" accept="image/*" required>
-                                            <small class="text-muted">Maximum file size: 2MB</small>
+                                            <!-- <small class="text-muted">Maximum file size: 2MB</small>
                                             <div id="fileError"
                                                 style="color: red; display: none; font-size: 12px;">
                                                 File is too large! Max limit is 2MB.
-                                            </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -69,13 +69,26 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <div class="row">
                                         <label class="col-sm-3 control-label">You can use to:</label>
                                         <div class="col-sm-9">
                                             <input type="text" name="canuseto"
                                                 placeholder="You can use to:"
                                                 class="form-control" required>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div class="form-group">
+                                    <div class="row">
+                                        <label class="col-sm-3 control-label">You can use to:</label>
+                                        <div class="col-sm-9">
+                                            <div id="canuse-wrapper">
+                                                <div class="canuse-item d-flex mb-2">
+                                                    <input type="text" name="canuseto[]" placeholder="You can use to:" class="form-control mr-2" required>
+                                                    <button type="button" class="btn btn-success" onclick="addCanuseField()">+</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -118,21 +131,17 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const imageInput = document.getElementById('imageInput');
-        const errorDiv = document.getElementById("fileError");
+    function addCanuseField() {
+            const wrapper = document.getElementById('canuse-wrapper');
+            const div = document.createElement('div');
+            div.className = 'canuse-item d-flex mb-2';
+            div.innerHTML = `
+        <input type="text" name="canuseto[]" placeholder="You can use to:" class="form-control mr-2" required>
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">−</button>
+    `;
+            wrapper.appendChild(div);
+        }
 
-        imageInput.onchange = function() {
-            if (this.files && this.files[0]) {
-                if (this.files[0].size > 2097152) {
-                    errorDiv.style.display = "block";
-                    this.value = "";
-                } else {
-                    errorDiv.style.display = "none";
-                }
-            }
-        };
-    });
 </script>
 
 <?php include('../constant/layout/footer.php'); ?>

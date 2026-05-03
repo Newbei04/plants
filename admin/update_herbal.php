@@ -4,7 +4,7 @@ include('../constant/connect.php');
 $id = $_POST['id'];
 $scientificName = $_POST['scientificname'];
 $meaning = $_POST['meaning'];
-$canUseTo = $_POST['canuseto'];
+$canUseTo = isset($_POST['canuseto']) ? implode(',', array_filter(array_map('trim', $_POST['canuseto']))) : '';
 $howToUse = $_POST['howtouse'];
 $trivia = $_POST['trivia'];
 

@@ -64,7 +64,7 @@ if (isset($_POST['btn_login'])) {
           </h1>
           <p>Invalid Email or Password</p>
           <p>
-            <a href="index.php"><button class="button button--error" data-for="js_error-popup">Close</button></a>
+            <a href="login.php"><button class="button button--error" data-for="js_error-popup">Close</button></a>
           </p>
       </div>
     </div>

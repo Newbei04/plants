@@ -16,7 +16,7 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
     // Check if the scanned QR code is for a herbal
-    $sqlHerbal = "SELECT * FROM herbal_details WHERE id = $id";
+    $sqlHerbal = "SELECT * FROM herbal_details WHERE id = $id AND value='0'";
     $resultHerbal = $con->query($sqlHerbal);
 
     if ($resultHerbal->num_rows > 0) {
@@ -24,7 +24,7 @@ if (isset($_GET['id'])) {
         $detail = $resultHerbal->fetch_assoc();
     } else {
         // If not herbal, fetch details from the not_herbal_details table
-        $sqlNotHerbal = "SELECT * FROM not_herbal_details WHERE id = $id";
+        $sqlNotHerbal = "SELECT * FROM not_herbal_details WHERE id = $id AND value='0'";
         $resultNotHerbal = $con->query($sqlNotHerbal);
 
         if ($resultNotHerbal->num_rows > 0) {

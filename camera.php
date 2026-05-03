@@ -100,56 +100,16 @@
 
 
 
+    <body>
+        <!-- Add this section for the QR code scanner -->
+        <section class="section container" id="qrScanner">
+            <h2 class="section__title-center">QR Code Scanner</h2>
 
+            <select id="camera-select" style="margin-bottom: 20px; padding: 10px; border-radius: 5px;"></select>
 
-    <!-- Add this section for the QR code scanner -->
-    <section class="section container" id="qrScanner">
-        <h2 class="section__title-center">QR Code Scanner</h2>
-        <video id="scanner"></video>
-    </section>
-
-
-
-    <!-- Add this script for the QR code scanner -->
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get the video element and create a new Instascan Scanner
-            let scannerElement = document.getElementById('scanner');
-            let scanner = new Instascan.Scanner({
-                video: scannerElement
-            });
-
-            // Add a function to handle the QR code scan
-            scanner.addListener('scan', function(content) {
-                // Check if the scanned content contains 'herbal'
-                if (content.includes('herbal')) {
-                    // Redirect to herbal_details.php with the scanned QR code value
-                    window.location.href = 'herbal_details.php?id=' + content;
-                } else {
-                    // Redirect to notherbal_details.php with the scanned QR code value
-                    window.location.href = 'herbalandnotherbal_details.php?id=' + content;
-                }
-            });
-
-            // Start the scanner
-            Instascan.Camera.getCameras().then(function(cameras) {
-                if (cameras.length > 0) {
-                    scanner.start(cameras[0]);
-                } else {
-                    console.error('No cameras found.');
-                }
-            }).catch(function(e) {
-                console.error(e);
-            });
-        });
-    </script>
-
-
-
-
-
-
+            <video id="scanner"></video>
+        </section>
+    </body>
 
 
     <!--==================== FOOTER ====================-->
@@ -206,5 +166,105 @@
     <!--=============== MAIN JS ===============-->
     <script src="assets2/js/main.js"></script>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Performance Fix for Chrome Canvas warning
+        (function() {
+            const nativeGetContext = HTMLCanvasElement.prototype.getContext;
+            HTMLCanvasElement.prototype.getContext = function(type, attributes) {
+                if (type === '2d') {
+                    attributes = {
+                        ...attributes,
+                        willReadFrequently: true
+                    };
+                }
+                return nativeGetContext.call(this, type, attributes);
+            };
+        })();
+
+        let scannerElement = document.getElementById('scanner');
+        let cameraSelect = document.getElementById('camera-select');
+
+        let scanner = new Instascan.Scanner({
+            video: scannerElement,
+            mirror: true
+        });
+
+        // 2. Scan Logic
+        scanner.addListener('scan', function(content) {
+            if (content.includes('herbal')) {
+                window.location.href = 'herbal_details.php?id=' + content;
+            } else {
+                window.location.href = 'herbalandnotherbal_details.php?id=' + content;
+            }
+        });
+
+        // 3. Robust Camera Control
+        let availableCameras = [];
+        let isTransitioning = false; // Prevents FsmError
+
+        async function startCamera(cam) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            try {
+                await scanner.start(cam);
+                console.log("Camera started successfully");
+            } catch (e) {
+                if (e.name === 'NotReadableError') {
+                    alert("Camera busy. Please switch to the USB WebCam and ensure OBS is not hijacking the feed.");
+                } else {
+                    console.warn("Scanner start issue:", e.message);
+                }
+            } finally {
+                isTransitioning = false;
+            }
+        }
+
+        // Initialize Cameras
+        Instascan.Camera.getCameras().then(function(cameras) {
+            availableCameras = cameras;
+            if (cameras.length > 0) {
+                cameraSelect.innerHTML = '';
+                cameras.forEach((camera, index) => {
+                    let option = document.createElement('option');
+                    option.value = index;
+                    option.text = camera.name || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+
+                // Start default
+                startCamera(cameras[0]);
+
+                // 4. Fixed Switching Logic to avoid FsmError
+                cameraSelect.addEventListener('change', async function() {
+                    const selectedIndex = this.value;
+
+                    try {
+                        // Stop current session first
+                        await scanner.stop();
+                    } catch (fsmError) {
+                        // If it's already stopped or transitioning, we ignore the error and move on
+                        console.log("Cleanup: Scanner was not in a stoppable state, proceeding anyway.");
+                    }
+
+                    // Hard-clear the video element to release hardware
+                    if (scannerElement.srcObject) {
+                        scannerElement.srcObject.getTracks().forEach(track => track.stop());
+                        scannerElement.srcObject = null;
+                    }
+
+                    // Small delay to allow hardware to breathe
+                    setTimeout(() => {
+                        startCamera(availableCameras[selectedIndex]);
+                    }, 300);
+                });
+
+            } else {
+                cameraSelect.innerHTML = '<option>No cameras detected</option>';
+            }
+        }).catch(e => console.error(e));
+    });
+</script>
 
 </html>

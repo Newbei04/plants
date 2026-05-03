@@ -1,7 +1,5 @@
 <?php
 session_start();
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
 include('../constant/connect.php');
 
 function showError($message)
@@ -28,27 +26,55 @@ function showError($message)
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    $id             = (int) $_POST['id'];
-    $scientificname = mysqli_real_escape_string($con, $_POST['scientificname'] ?? '');
-    $herbal_plant   = mysqli_real_escape_string($con, $_POST['herbal_plant']   ?? '');
+    $id             = (int) ($_POST['id'] ?? 0);
+    $scientificName = trim($_POST['scientificname'] ?? '');
+    $herbalPlants   = $_POST['herbal_plant'] ?? [];
 
-    if (empty($scientificname)) {
+    if (!$id) {
+        showError("Invalid record ID.");
+    }
+
+    if (empty($scientificName)) {
         showError("Scientific name is required.");
     }
 
-    if (empty($herbal_plant)) {
-        showError("Please select a herbal plant.");
+    if (empty($herbalPlants) || !is_array($herbalPlants)) {
+        showError("Please select at least one herbal plant.");
     }
 
-    $updateQuery = "UPDATE flucategories 
-                    SET scientific_name='$scientificname', herbal_plant='$herbal_plant' 
-                    WHERE id=$id";
+    // CHECK DUPLICATE — exclude current record from duplicate check
+    $checkStmt = $con->prepare("SELECT id FROM flucategories WHERE scientific_name = ? AND id != ?");
+    if (!$checkStmt) {
+        showError("Query preparation failed.");
+    }
+    $checkStmt->bind_param("si", $scientificName, $id);
+    $checkStmt->execute();
+    $checkStmt->store_result();
 
-    $result = mysqli_query($con, $updateQuery);
+    if ($checkStmt->num_rows > 0) {
+        showError("Scientific name already exists!");
+    }
+    $checkStmt->close();
 
-    if ($result) {
-        mysqli_close($con);
-        echo "<!DOCTYPE html>
+    // Implode array into comma-separated string
+    $herbalPlantString = implode(',', $herbalPlants);
+
+    // UPDATE
+    $stmt = $con->prepare("UPDATE flucategories SET scientific_name = ?, herbal_plant = ? WHERE id = ?");
+    if (!$stmt) {
+        showError("Prepare failed: " . $con->error);
+    }
+
+    $stmt->bind_param("ssi", $scientificName, $herbalPlantString, $id);
+
+    if (!$stmt->execute()) {
+        showError("Update failed: " . $stmt->error);
+    }
+
+    $stmt->close();
+    $con->close();
+
+    echo "<!DOCTYPE html>
 <html>
 <head><meta charset='UTF-8'></head>
 <body>
@@ -64,9 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </script>
 </body>
 </html>";
-    } else {
-        showError("Update failed: " . mysqli_error($con));
-    }
 } else {
     $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
     header("Location: edit_flucategory.php?id=$id");

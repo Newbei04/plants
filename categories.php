@@ -103,7 +103,7 @@ $resultFluCategories = $con->query($sqlFluCategories);
             // Check if the query was successful
             if ($resultFluCategories) {
                 while ($row = $resultFluCategories->fetch_assoc()) {
-                    ?>
+            ?>
                     <article class="product__card">
                         <!-- Adjust the content based on your table columns -->
                         <a href="flu_details.php?id=<?php echo $row['id']; ?>" class="button--flex product__button">
@@ -114,7 +114,7 @@ $resultFluCategories = $con->query($sqlFluCategories);
                         </h3>
 
                     </article>
-                    <?php
+            <?php
                 }
             } else {
                 echo "Error: " . $con->error;
@@ -129,31 +129,38 @@ $resultFluCategories = $con->query($sqlFluCategories);
 
     <script>
         function searchFluCategories() {
-            var input, filter, cards, cardContainer, title, i, found;
-            input = document.getElementById("fluSearchInput");
-            filter = input.value.toUpperCase();
-            cardContainer = document.getElementById("fluProductContainer");
-            cards = cardContainer.getElementsByClassName("product__card");
-            found = false;
+            // Get elements
+            const input = document.getElementById("fluSearchInput");
+            const filter = input.value.toUpperCase().trim();
+            const cardContainer = document.getElementById("fluProductContainer");
+            const cards = cardContainer.getElementsByClassName("product__card");
+            const searchNotFound = document.getElementById("searchNotFound");
 
-            for (i = 0; i < cards.length; i++) {
-                title = cards[i].querySelector(".product__title");
-                if (title.innerText.toUpperCase().indexOf(filter) > -1) {
-                    cards[i].style.display = "";
-                    found = true;
-                } else {
-                    cards[i].style.display = "none";
+            let found = false;
+
+            // Loop through all cards
+            for (let i = 0; i < cards.length; i++) {
+                const titleElement = cards[i].querySelector(".product__title");
+
+                if (titleElement) {
+                    const textValue = titleElement.textContent || titleElement.innerText;
+
+                    // Check if the filter string exists in the title
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        cards[i].style.display = ""; // Show card
+                        found = true;
+                    } else {
+                        cards[i].style.display = "none"; // Hide card
+                    }
                 }
             }
 
-            // Display search not found message
-            var searchNotFound = document.getElementById("searchNotFound");
-            if (!found) {
-                searchNotFound.style.display = "block";
-            } else {
-                searchNotFound.style.display = "none";
-            }
+            // Toggle "No results found" message
+            searchNotFound.style.display = found ? "none" : "block";
         }
+
+        // Add Live Search: This triggers the search as the user types
+        document.getElementById("fluSearchInput").addEventListener("keyup", searchFluCategories);
     </script>
 
 

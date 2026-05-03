@@ -4,151 +4,184 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--=============== FAVICON ===============-->
   <link rel="shortcut icon" href="assets2/img/logo1.png" type="image/x-icon" />
+
+  <!--=============== REMIX ICONS ===============-->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <!--=============== CSS ===============-->
   <link rel="stylesheet" href="assets2/css/styles.css" />
-  <title>Our Farm Republic</title>
+
+  <style>
+    /* ===== HOW TO USE PAGE STYLES ===== */
+    .howtouse {
+      padding: 6rem 0 2rem;
+    }
+
+    .howtouse__title {
+      font-size: 2rem;
+      color: var(--title-color);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .howtouse__subtitle {
+      text-align: center;
+      color: var(--text-color);
+      margin-bottom: 3rem;
+    }
+
+    /* Each "Way" block */
+    .howtouse__way {
+      margin-bottom: 3rem;
+    }
+
+    .howtouse__way + .howtouse__way {
+      padding-top: 2.5rem;
+      border-top: 1px solid rgba(128, 128, 128, 0.15);
+    }
+
+    .howtouse__way-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .howtouse__way-badge {
+      display: inline-block;
+      background-color: var(--first-color);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.9rem;
+      border-radius: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .howtouse__way-title {
+      font-size: 1.25rem;
+      color: var(--title-color);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .howtouse__way-title i {
+      color: var(--first-color);
+    }
+
+    .howtouse__way-desc {
+      color: var(--text-color);
+      font-size: 0.93rem;
+    }
+
+    /* Steps grid */
+    .howtouse__steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .howtouse__card {
+      background-color: var(--container-color);
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .howtouse__card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Placeholder image area */
+    .howtouse__card-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      background-color: rgba(128, 128, 128, 0.08);
+    }
+
+    /* Styled placeholder when no real image yet */
+    .howtouse__card-img-placeholder {
+      width: 100%;
+      height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(128, 128, 128, 0.07);
+      gap: 0.4rem;
+      border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+    }
+
+    .howtouse__card-img-placeholder i {
+      font-size: 2.5rem;
+      color: var(--first-color);
+      opacity: 0.5;
+    }
+
+    .howtouse__card-img-placeholder span {
+      font-size: 0.75rem;
+      color: var(--text-color);
+      opacity: 0.5;
+    }
+
+    /* Card body */
+    .howtouse__card-body {
+      padding: 1.25rem 1rem 1.5rem;
+    }
+
+    .howtouse__step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: var(--first-color);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .howtouse__card-title {
+      font-size: 1rem;
+      color: var(--title-color);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .howtouse__card-desc {
+      font-size: 0.88rem;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    /* Replace image hint */
+    .howtouse__img-hint {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-color);
+      opacity: 0.45;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+  </style>
+
+  <title>How to Use – Our Farm Republic</title>
 </head>
 
-<style>
-  .howtouse {
-    padding: 6rem 0 2rem;
-  }
-
-  .howtouse__title {
-    font-size: 2rem;
-    color: var(--title-color);
-    text-align: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .howtouse__subtitle {
-    text-align: center;
-    color: var(--text-color);
-    margin-bottom: 3rem;
-  }
-
-  /* Each "Way" block */
-  .howtouse__way {
-    margin-bottom: 3rem;
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-
-  .howtouse__way.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .howtouse__way+.howtouse__way {
-    padding-top: 2.5rem;
-    border-top: 1px solid rgba(128, 128, 128, 0.15);
-  }
-
-  .howtouse__way-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .howtouse__way-badge {
-    display: inline-block;
-    background-color: var(--first-color);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.25rem 0.9rem;
-    border-radius: 2rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .howtouse__way-title {
-    font-size: 1.25rem;
-    color: var(--title-color);
-    font-weight: 700;
-    margin-bottom: 0.35rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .howtouse__way-title i {
-    color: var(--first-color);
-  }
-
-  .howtouse__way-desc {
-    color: var(--text-color);
-    font-size: 0.93rem;
-  }
-
-  /* Steps grid */
-  .howtouse__steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.25rem;
-  }
-
-  .howtouse__card {
-    background-color: var(--container-color);
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
-    text-align: center;
-    transition: transform 0.35s ease, box-shadow 0.35s ease;
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  .howtouse__card.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .howtouse__card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.13);
-  }
-
-  /* Card body */
-  .howtouse__card-body {
-    padding: 1.25rem 1rem 1.5rem;
-  }
-
-  .howtouse__step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background-color: var(--first-color);
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 0.6rem;
-    transition: transform 0.3s ease;
-  }
-
-  .howtouse__card:hover .howtouse__step-number {
-    transform: scale(1.15);
-  }
-
-  .howtouse__card-title {
-    font-size: 1rem;
-    color: var(--title-color);
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-  }
-
-  .howtouse__card-desc {
-    font-size: 0.88rem;
-    color: var(--text-color);
-    line-height: 1.6;
-  }
-</style>
-
 <body>
+  <!--==================== HEADER ====================-->
   <header class="header" id="header">
     <nav class="nav container">
       <a href="index.php" class="nav__logo">
@@ -159,7 +192,7 @@
       <div class="nav__menu" id="nav-menu">
         <ul class="nav__list">
           <li class="nav__item">
-            <a href="index.php" class="nav__link active-link">Home</a>
+            <a href="index.php" class="nav__link">Home</a>
           </li>
           <li class="nav__item">
             <a href="library.php" class="nav__link">Library</a>
@@ -169,6 +202,9 @@
           </li>
           <li class="nav__item">
             <a href="camera.php" class="nav__link">Camera</a>
+          </li>
+          <li class="nav__item">
+            <a href="howtouse.php" class="nav__link active-link">How to Use</a>
           </li>
           <li class="nav__item">
             <a href="about.php" class="nav__link">About Us</a>
@@ -190,34 +226,13 @@
   </header>
 
   <main class="main">
-    <section class="home" id="home">
-      <div class="home__container container grid">
-        <img src="assets2/img/home.png" alt="" class="home__img" />
 
-        <div class="home__data">
-          <h1 class="home__title">
-            Plants will make <br />
-            your life better
-          </h1>
-          <p class="home__description">
-            There are no incurable diseases only the lack of will. There are
-            no worthless herbs only the lack of knowledge
-          </p>
-        </div>
-
-        <div class="home__social">
-          <div class="home__social-links"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="home" id="howtouse">
+    <section class="howtouse section" id="howtouse">
       <div class="container">
 
         <h1 class="howtouse__title">How to Use Our Farm Republic</h1>
         <p class="howtouse__subtitle">There are three ways to explore and find plants on our platform.</p>
 
-        <!-- WAY 1 -->
         <div class="howtouse__way">
           <div class="howtouse__way-header">
             <span class="howtouse__way-badge">Way 1</span>
@@ -229,6 +244,7 @@
             </p>
           </div>
           <div class="howtouse__steps">
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">1</span>
@@ -238,6 +254,7 @@
                 </p>
               </div>
             </div>
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">2</span>
@@ -247,6 +264,7 @@
                 </p>
               </div>
             </div>
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">3</span>
@@ -256,10 +274,11 @@
                 </p>
               </div>
             </div>
+
           </div>
         </div>
 
-        <!-- WAY 2 -->
+        <!-- ===== WAY 2: QR CODE ===== -->
         <div class="howtouse__way">
           <div class="howtouse__way-header">
             <span class="howtouse__way-badge">Way 2</span>
@@ -271,6 +290,7 @@
             </p>
           </div>
           <div class="howtouse__steps">
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">1</span>
@@ -280,6 +300,7 @@
                 </p>
               </div>
             </div>
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">2</span>
@@ -289,6 +310,7 @@
                 </p>
               </div>
             </div>
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">3</span>
@@ -298,10 +320,10 @@
                 </p>
               </div>
             </div>
+
           </div>
         </div>
 
-        <!-- WAY 3 -->
         <div class="howtouse__way">
           <div class="howtouse__way-header">
             <span class="howtouse__way-badge">Way 3</span>
@@ -313,6 +335,7 @@
             </p>
           </div>
           <div class="howtouse__steps">
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">1</span>
@@ -322,6 +345,7 @@
                 </p>
               </div>
             </div>
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">2</span>
@@ -331,6 +355,7 @@
                 </p>
               </div>
             </div>
+
             <div class="howtouse__card">
               <div class="howtouse__card-body">
                 <span class="howtouse__step-number">3</span>
@@ -340,12 +365,14 @@
                 </p>
               </div>
             </div>
+
           </div>
         </div>
 
       </div>
     </section>
 
+    <!--==================== FOOTER ====================-->
     <footer class="footer section">
       <div class="footer__container container grid">
         <div class="footer__content">
@@ -384,54 +411,16 @@
       </div>
     </footer>
 
+    <!--=============== SCROLL UP ===============-->
     <a href="#" class="scrollup" id="scroll-up">
       <i class="ri-arrow-up-fill scrollup__icon"></i>
     </a>
-  </main>
 
-  <script src="assets2/js/scrollreveal.min.js"></script>
+    <!--=============== SCROLL REVEAL ===============-->
+    <script src="assets2/js/scrollreveal.min.js"></script>
 
-  <script src="assets2/js/main.js"></script>
-
-  <script>
-    // Animate "Way" sections on scroll
-    const ways = document.querySelectorAll('.howtouse__way');
-    const cards = document.querySelectorAll('.howtouse__card');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.1
-    });
-
-    ways.forEach((way, i) => {
-      way.style.transitionDelay = (i * 120) + 'ms';
-      observer.observe(way);
-    });
-
-    const cardObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          cardObserver.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.15
-    });
-
-    cards.forEach((card, i) => {
-      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease, box-shadow 0.35s ease';
-      card.style.transitionDelay = (i % 3) * 80 + 'ms';
-      cardObserver.observe(card);
-    });
-  </script>
-
+    <!--=============== MAIN JS ===============-->
+    <script src="assets2/js/main.js"></script>
 </body>
 
 </html>

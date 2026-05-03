@@ -60,12 +60,36 @@ if ($result) {
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <div class="row">
                                         <label class="col-sm-3 control-label">You can use to:</label>
                                         <div class="col-sm-9">
                                              <textarea name="canuseto" class="form-control"
                                                 required><?php echo $row['can_use_to']; ?></textarea>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <label class="col-sm-3 control-label">You can use to:</label>
+                                        <div class="col-sm-9">
+                                            <div id="canuse-wrapper">
+                                                <?php
+                                                $uses = explode(',', $row['can_use_to']);
+                                                foreach ($uses as $index => $use):
+                                                ?>
+                                                    <div class="canuse-item d-flex mb-2">
+                                                        <input type="text" name="canuseto[]" class="form-control mr-2"
+                                                            value="<?php echo htmlspecialchars(trim($use)); ?>" required>
+                                                        <?php if ($index === 0): ?>
+                                                            <button type="button" class="btn btn-success" onclick="addCanuseField()">+</button>
+                                                        <?php else: ?>
+                                                            <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">−</button>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -101,5 +125,16 @@ if ($result) {
         </div>
     </div>
 </div>
-
+<script>
+    function addCanuseField() {
+        const wrapper = document.getElementById('canuse-wrapper');
+        const div = document.createElement('div');
+        div.className = 'canuse-item d-flex mb-2';
+        div.innerHTML = `
+        <input type="text" name="canuseto[]" placeholder="You can use to:" class="form-control mr-2" required>
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">−</button>
+    `;
+        wrapper.appendChild(div);
+    }
+</script>
 <?php include('../constant/layout/footer.php'); ?>
