@@ -11,23 +11,14 @@ include(__DIR__ . '/../phpqrcode/qrlib.php');
 function showError($message)
 {
     $safe = htmlspecialchars($message, ENT_QUOTES);
-
     echo "<!DOCTYPE html>
-<html>
-<head><meta charset='UTF-8'></head>
-<body>
+<html><head><meta charset='UTF-8'></head><body>
 <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 <script>
-Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: '{$safe}'
-}).then(() => {
-    window.location.href = 'new_herbal.php';
-});
+Swal.fire({ icon:'error', title:'Error', text:'{$safe}' })
+    .then(() => { window.location.href = 'new_herbal.php'; });
 </script>
-</body>
-</html>";
+</body></html>";
     exit();
 }
 
@@ -36,13 +27,30 @@ Swal.fire({
 ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $scientificName = $_POST['scientificname'] ?? '';
-    $meaning        = $_POST['meaning'] ?? '';
-    // $canUseTo       = $_POST['canuseto'] ?? '';
-    $canUseTo = isset($_POST['canuseto']) ? implode(',', array_filter(array_map('trim', $_POST['canuseto']))) : '';
-    $howToUse       = $_POST['howtouse'] ?? '';
-    $trivia         = $_POST['trivia'] ?? '';
+    $scientificName = trim($_POST['scientificname'] ?? '');
+    $meaning        = trim($_POST['meaning']        ?? '');
+    $howToUse       = trim($_POST['howtouse']       ?? '');
+    $trivia         = trim($_POST['trivia']         ?? '');
     $value          = 0;
+
+    // ── Decode and validate the JSON pairs ──────────────────────────────────
+    $pairsRaw = $_POST['pairs_json'] ?? '[]';
+    $pairs    = json_decode($pairsRaw, true);
+
+    if (!is_array($pairs) || count($pairs) === 0) {
+        showError("Please add at least one symptom/category.");
+    }
+
+    // Sanitise each pair and re-encode cleanly
+    $cleanPairs = [];
+    foreach ($pairs as $p) {
+        $cleanPairs[] = [
+            'category'   => trim($p['category']   ?? ''),
+            'can_use_to' => trim($p['can_use_to']  ?? '')
+        ];
+    }
+    // This is what gets stored in the DB column
+    $canUseTo = json_encode($cleanPairs, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
     if (!$con) {
         showError("Database connection failed.");
@@ -56,29 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $uploadDir = __DIR__ . "/../uploads/";
-
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
     $ext = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
 
-    if (!getimagesize($_FILES["image"]["tmp_name"])) {
-        showError("File is not an image.");
-    }
+    if (!getimagesize($_FILES["image"]["tmp_name"])) showError("File is not an image.");
+    if ($_FILES["image"]["size"] > 5 * 1024 * 1024)  showError("File is too large (max 5MB).");
+    if (!in_array($ext, ["jpg", "jpeg", "png", "gif"]))  showError("Only JPG, JPEG, PNG & GIF allowed.");
 
-    if ($_FILES["image"]["size"] > 5 * 1024 * 1024) {
-        showError("File is too large (max 5MB).");
-    }
-
-    if (!in_array($ext, ["jpg", "jpeg", "png", "gif"])) {
-        showError("Only JPG, JPEG, PNG & GIF allowed.");
-    }
-
-    // 🔥 UNIQUE FILE NAME (IMPORTANT FIX)
-    $fileName = uniqid("herbal_", true) . "." . $ext;
-
-    $serverPath = $uploadDir . $fileName;
+    $fileName     = uniqid("herbal_", true) . "." . $ext;
+    $serverPath   = $uploadDir . $fileName;
     $webImagePath = "uploads/" . $fileName;
 
     if (!move_uploaded_file($_FILES["image"]["tmp_name"], $serverPath)) {
@@ -92,24 +87,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $check->bind_param("s", $scientificName);
     $check->execute();
     $check->store_result();
-
-    if ($check->num_rows > 0) {
-        showError("Scientific name already exists!");
-    }
+    if ($check->num_rows > 0) showError("Scientific name already exists!");
     $check->close();
 
     /* =========================
        INSERT DATA
     ========================= */
     $stmt = $con->prepare("
-        INSERT INTO herbal_details 
-        (scientific_name, meaning, can_use_to, how_to_use, trivia, image, value) 
+        INSERT INTO herbal_details
+            (scientific_name, meaning, can_use_to, how_to_use, trivia, image, value)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
 
-    if (!$stmt) {
-        showError("Prepare failed: " . $con->error);
-    }
+    if (!$stmt) showError("Prepare failed: " . $con->error);
 
     $stmt->bind_param(
         "ssssssi",
@@ -118,13 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $canUseTo,
         $howToUse,
         $trivia,
-        $webImagePath,   // ✅ FIXED: store WEB PATH not server path
+        $webImagePath,
         $value
     );
 
-    if (!$stmt->execute()) {
-        showError("Insert failed: " . $stmt->error);
-    }
+    if (!$stmt->execute()) showError("Insert failed: " . $stmt->error);
 
     $herbalId = $stmt->insert_id;
 
@@ -132,13 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        QR CODE GENERATION
     ========================= */
     $qrDir = __DIR__ . "/../qrcodes/";
+    if (!is_dir($qrDir)) mkdir($qrDir, 0777, true);
 
-    if (!is_dir($qrDir)) {
-        mkdir($qrDir, 0777, true);
-    }
-
-    $qrFileName = "qr_" . $herbalId . ".png";
-
+    $qrFileName   = "qr_" . $herbalId . ".png";
     $qrServerPath = $qrDir . $qrFileName;
     $qrWebPath    = "qrcodes/" . $qrFileName;
 
@@ -157,19 +141,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        SUCCESS
     ========================= */
     echo "<!DOCTYPE html>
-<html>
-<head><meta charset='UTF-8'></head>
-<body>
+<html><head><meta charset='UTF-8'></head><body>
 <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
 <script>
-Swal.fire({
-    icon: 'success',
-    title: 'Success',
-    text: 'Herbal added successfully!'
-}).then(() => {
-    window.location.href = 'manage_herbal.php';
-});
+Swal.fire({ icon:'success', title:'Success', text:'Herbal added successfully!' })
+    .then(() => { window.location.href = 'manage_herbal.php'; });
 </script>
-</body>
-</html>";
+</body></html>";
 }

@@ -4,9 +4,7 @@
 <?php include('../constant/layout/sidebar.php'); ?>
 <?php include('../constant/connect.php'); ?>
 
-<!-- Page wrapper -->
 <div class="page-wrapper">
-    <!-- Bread crumb -->
     <div class="row page-titles">
         <div class="col-md-5 align-self-center">
             <h3 class="text-primary">Add Herbal</h3>
@@ -18,130 +16,168 @@
             </ol>
         </div>
     </div>
-    <!-- End Bread crumb -->
 
-    <!-- Container fluid -->
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-8" style="margin-left: 10%;">
                 <div class="card">
-                    <div class="card-title"></div>
                     <div class="card-body">
-                        <div class="input-states">
-                            <form class="form-horizontal" action="connect1.php" method="post"
-                                enctype="multipart/form-data">
+                        <form class="form-horizontal" action="connect1.php" method="post"
+                            enctype="multipart/form-data" onsubmit="buildJson()">
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Image:</label>
-                                        <div class="col-sm-9">
-                                            <!-- <input type="hidden" name="MAX_FILE_SIZE" value="2097152" /> -->
-                                            <input type="file" id="imageInput" name="image"
-                                                class="form-control-file" accept="image/*" required>
-                                            <!-- <small class="text-muted">Maximum file size: 2MB</small>
-                                            <div id="fileError"
-                                                style="color: red; display: none; font-size: 12px;">
-                                                File is too large! Max limit is 2MB.
-                                            </div> -->
-                                        </div>
+                            <!-- Image -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Image:</label>
+                                    <div class="col-sm-9">
+                                        <input type="file" name="image" id="imageInput"
+                                            class="form-control-file" accept="image/*" required>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Plant/Scientific Name:</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" name="scientificname"
-                                                placeholder="Enter Plant/Scientific Name"
-                                                class="form-control" required>
-                                        </div>
+                            <!-- Plant/Scientific Name -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Plant/Scientific Name:</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="scientificname"
+                                            placeholder="Enter Plant/Scientific Name"
+                                            class="form-control" required>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Meaning:</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" name="meaning"
-                                                placeholder="Enter meaning"
-                                                class="form-control" required>
-                                        </div>
+                            <!-- Meaning -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Meaning:</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="meaning"
+                                            placeholder="Enter meaning"
+                                            class="form-control" required>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">You can use to:</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" name="canuseto"
-                                                placeholder="You can use to:"
-                                                class="form-control" required>
-                                        </div>
-                                    </div>
-                                </div> -->
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">You can use to:</label>
-                                        <div class="col-sm-9">
-                                            <div id="canuse-wrapper">
-                                                <div class="canuse-item d-flex mb-2">
-                                                    <input type="text" name="canuseto[]" placeholder="You can use to:" class="form-control mr-2" required>
-                                                    <button type="button" class="btn btn-success" onclick="addCanuseField()">+</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <!-- Symptom + How to use pairs -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Symptoms &amp; How to use:</label>
+                                    <div class="col-sm-9">
+                                        <div id="pairs-wrapper"></div>
+                                        <button type="button" class="btn btn-success btn-sm mt-2"
+                                            onclick="addPair()">+ Add Symptom</button>
+                                        <small class="form-text text-muted">
+                                            Each symptom has its own "how to use" description.
+                                        </small>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">How to use:</label>
-                                        <div class="col-sm-9">
-                                            <textarea name="howtouse"
-                                                placeholder="Enter how to use"
-                                                class="form-control" required></textarea>
-                                        </div>
+                            <!-- Hidden JSON field — populated on submit -->
+                            <input type="hidden" name="pairs_json" id="pairs_json">
+
+                            <!-- How to use -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">How to use:</label>
+                                    <div class="col-sm-9">
+                                        <textarea name="howtouse" placeholder="Enter how to use"
+                                            class="form-control" rows="4" required></textarea>
                                     </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Trivia:</label>
-                                        <div class="col-sm-9">
-                                            <textarea name="trivia"
-                                                placeholder="Enter trivia"
-                                                class="form-control" required></textarea>
-                                        </div>
+                            </div>
+                            
+                            <!-- Trivia -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Trivia:</label>
+                                    <div class="col-sm-9">
+                                        <textarea name="trivia" placeholder="Enter trivia"
+                                            class="form-control" rows="3" required></textarea>
                                     </div>
                                 </div>
+                            </div>
 
-                                <input type="submit" value="Submit"
-                                    class="btn btn-primary btn-flat m-b-30 m-t-30">
-
-                            </form>
-                        </div>
+                            <input type="submit" value="Submit"
+                                class="btn btn-primary btn-flat m-b-30 m-t-30">
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- End Container fluid -->
 </div>
-<!-- End Page wrapper -->
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-    function addCanuseField() {
-            const wrapper = document.getElementById('canuse-wrapper');
-            const div = document.createElement('div');
-            div.className = 'canuse-item d-flex mb-2';
-            div.innerHTML = `
-        <input type="text" name="canuseto[]" placeholder="You can use to:" class="form-control mr-2" required>
-        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">−</button>
-    `;
-            wrapper.appendChild(div);
-        }
+    const symptoms = <?php
+                        $symptomQuery  = "SELECT scientific_name FROM flucategories ORDER BY scientific_name";
+                        $symptomResult = mysqli_query($con, $symptomQuery);
+                        $names = [];
+                        while ($row = mysqli_fetch_assoc($symptomResult)) {
+                            $names[] = $row['scientific_name'];
+                        }
+                        echo json_encode($names);
+                        ?>;
 
+    let pairCount = 0;
+
+    function buildOptions(selectedVal = '') {
+        let opts = '<option value="">-- Select Category --</option>';
+        symptoms.forEach(s => {
+            const sel = s === selectedVal ? ' selected' : '';
+            opts += `<option value="${s}"${sel}>${s}</option>`;
+        });
+        return opts;
+    }
+
+    function addPair(selectedVal = '', howto = '') {
+        pairCount++;
+        const id = pairCount;
+        const wrapper = document.getElementById('pairs-wrapper');
+        const div = document.createElement('div');
+        div.id = 'pair-' + id;
+        div.className = 'border rounded p-3 mb-2';
+        div.style.background = '#f9f9f9';
+        div.innerHTML = `
+            <div class="form-group mb-2">
+                <label class="control-label" style="font-size:13px;">Category</label>
+                <select class="form-control pair-category">
+                    ${buildOptions(selectedVal)}
+                </select>
+            </div>
+            <div class="form-group mb-1">
+                <label class="control-label" style="font-size:13px;">How to use for this category</label>
+                <textarea class="form-control pair-howto" rows="2"
+                    placeholder="Describe how to use this plant for the selected category...">${howto}</textarea>
+            </div>
+            ${id > 1
+                ? `<button type="button" class="btn btn-danger btn-sm"
+                    onclick="document.getElementById('pair-${id}').remove()">− Remove</button>`
+                : ''}
+        `;
+        wrapper.appendChild(div);
+    }
+
+    function buildJson() {
+        const pairs = [];
+        document.querySelectorAll('#pairs-wrapper > div').forEach(div => {
+            const category = div.querySelector('.pair-category').value.trim();
+            const can_use_to = div.querySelector('.pair-howto').value.trim();
+            if (category) {
+                pairs.push({
+                    category,
+                    can_use_to
+                });
+            }
+        });
+        document.getElementById('pairs_json').value = JSON.stringify(pairs);
+    }
+
+    // Start with one pair on load
+    addPair();
 </script>
 
 <?php include('../constant/layout/footer.php'); ?>

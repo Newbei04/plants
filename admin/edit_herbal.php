@@ -4,17 +4,33 @@ include('../constant/layout/header.php');
 include('../constant/layout/sidebar.php');
 include('../constant/connect.php');
 
-$id = $_GET['id'];
+$id     = (int)$_GET['id'];
+$sql    = "SELECT * FROM herbal_details WHERE id=?";
+$stmt   = $con->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$row    = $result->fetch_assoc();
 
-$sql = "SELECT * FROM herbal_details WHERE id='$id'";
-$result = mysqli_query($con, $sql);
-
-if ($result) {
-    $row = mysqli_fetch_assoc($result);
-} else {
-    echo "Error: " . mysqli_error($con);
+if (!$row) {
+    die("Record not found.");
 }
 
+// Decode existing JSON pairs; fall back gracefully for old comma-separated data
+$existingPairs = json_decode($row['can_use_to'], true);
+if (!is_array($existingPairs)) {
+    $existingPairs = array_map(fn($u) => [
+        'category'   => trim($u),
+        'can_use_to' => ''
+    ], explode(',', $row['can_use_to']));
+}
+
+// Fetch categories for the dropdown
+$catResult  = mysqli_query($con, "SELECT scientific_name FROM flucategories ORDER BY scientific_name");
+$categories = [];
+while ($c = mysqli_fetch_assoc($catResult)) {
+    $categories[] = $c['scientific_name'];
+}
 ?>
 
 <div class="page-wrapper">
@@ -35,106 +51,149 @@ if ($result) {
             <div class="col-lg-8" style="margin-left: 10%;">
                 <div class="card">
                     <div class="card-body">
-                        <div class="input-states">
-                            <form class="form-horizontal" method="POST" enctype="multipart/form-data"
-                                action="update_herbal.php">
+                        <form class="form-horizontal" method="POST"
+                            enctype="multipart/form-data"
+                            action="update_herbal.php"
+                            onsubmit="buildJson()">
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Scientific Name:</label>
-                                        <div class="col-sm-9">
-                                            <input type="hidden" name="id" value="<?php echo $id; ?>">
-                                            <input type="text" name="scientificname" class="form-control"
-                                                value="<?php echo $row['scientific_name']; ?>" required>
-                                        </div>
+                            <input type="hidden" name="id" value="<?php echo $id; ?>">
+
+                            <!-- Scientific Name -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Scientific Name:</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="scientificname" class="form-control"
+                                            value="<?php echo htmlspecialchars($row['scientific_name']); ?>" required>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Meaning:</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" name="meaning" class="form-control"
-                                                value="<?php echo $row['meaning']; ?>" required>
-                                        </div>
+                            <!-- Meaning -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Meaning:</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="meaning" class="form-control"
+                                            value="<?php echo htmlspecialchars($row['meaning']); ?>" required>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">You can use to:</label>
-                                        <div class="col-sm-9">
-                                             <textarea name="canuseto" class="form-control"
-                                                required><?php echo $row['can_use_to']; ?></textarea>
-                                        </div>
-                                    </div>
-                                </div> -->
-
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">You can use to:</label>
-                                        <div class="col-sm-9">
-                                            <div id="canuse-wrapper">
-                                                <?php
-                                                $uses = explode(',', $row['can_use_to']);
-                                                foreach ($uses as $index => $use):
-                                                ?>
-                                                    <div class="canuse-item d-flex mb-2">
-                                                        <input type="text" name="canuseto[]" class="form-control mr-2"
-                                                            value="<?php echo htmlspecialchars(trim($use)); ?>" required>
-                                                        <?php if ($index === 0): ?>
-                                                            <button type="button" class="btn btn-success" onclick="addCanuseField()">+</button>
-                                                        <?php else: ?>
-                                                            <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">−</button>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        </div>
+                            <!-- Symptom + How to use pairs -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Symptoms &amp; How to use:</label>
+                                    <div class="col-sm-9">
+                                        <div id="pairs-wrapper"></div>
+                                        <button type="button" class="btn btn-success btn-sm mt-2"
+                                            onclick="addPair()">+ Add Symptom</button>
+                                        <small class="form-text text-muted">
+                                            Each symptom has its own "how to use" description.
+                                        </small>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">How to use:</label>
-                                        <div class="col-sm-9">
-                                            <textarea name="howtouse" class="form-control"
-                                                required><?php echo $row['how_to_use']; ?></textarea>
-                                        </div>
+                            <!-- Hidden JSON field -->
+                            <input type="hidden" name="pairs_json" id="pairs_json">
+
+                            <!-- How to use -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">How to use:</label>
+                                    <div class="col-sm-9">
+                                        <textarea name="howtouse" class="form-control"
+                                            rows="4" required><?php echo htmlspecialchars($row['how_to_use']); ?></textarea>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <div class="row">
-                                        <label class="col-sm-3 control-label">Trivia:</label>
-                                        <div class="col-sm-9">
-                                            <textarea name="trivia" class="form-control"
-                                                required><?php echo $row['trivia']; ?></textarea>
-                                        </div>
+                            <!-- Trivia -->
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 control-label">Trivia:</label>
+                                    <div class="col-sm-9">
+                                        <textarea name="trivia" class="form-control"
+                                            rows="3" required><?php echo htmlspecialchars($row['trivia']); ?></textarea>
                                     </div>
                                 </div>
+                            </div>
 
-                                <button type="submit" name="submit"
-                                    class="btn btn-primary btn-flat m-b-30 m-t-30">Update</button>
-
-                            </form>
-                        </div>
+                            <button type="submit" class="btn btn-primary btn-flat m-b-30 m-t-30">Update</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function addCanuseField() {
-        const wrapper = document.getElementById('canuse-wrapper');
+    const symptoms = <?php echo json_encode($categories); ?>;
+    const existingPairs = <?php echo json_encode($existingPairs); ?>;
+
+    let pairCount = 0;
+
+    function buildOptions(selectedVal = '') {
+        let opts = '<option value="">-- Select Category --</option>';
+        symptoms.forEach(s => {
+            const sel = s === selectedVal ? ' selected' : '';
+            opts += `<option value="${s}"${sel}>${s}</option>`;
+        });
+        return opts;
+    }
+
+    function addPair(selectedVal = '', howto = '') {
+        pairCount++;
+        const id = pairCount;
+        const wrapper = document.getElementById('pairs-wrapper');
         const div = document.createElement('div');
-        div.className = 'canuse-item d-flex mb-2';
+        div.id = 'pair-' + id;
+        div.className = 'border rounded p-3 mb-2';
+        div.style.background = '#f9f9f9';
         div.innerHTML = `
-        <input type="text" name="canuseto[]" placeholder="You can use to:" class="form-control mr-2" required>
-        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">−</button>
-    `;
+            <div class="form-group mb-2">
+                <label class="control-label" style="font-size:13px;">Category</label>
+                <select class="form-control pair-category">
+                    ${buildOptions(selectedVal)}
+                </select>
+            </div>
+            <div class="form-group mb-1">
+                <label class="control-label" style="font-size:13px;">How to use for this category</label>
+                <textarea class="form-control pair-howto" rows="2"
+                    placeholder="Describe how to use this plant for the selected category...">${howto}</textarea>
+            </div>
+            ${id > 1
+                ? `<button type="button" class="btn btn-danger btn-sm mt-1"
+                    onclick="document.getElementById('pair-${id}').remove()">− Remove</button>`
+                : ''}
+        `;
         wrapper.appendChild(div);
     }
+
+    function buildJson() {
+        const pairs = [];
+        document.querySelectorAll('#pairs-wrapper > div').forEach(div => {
+            const category = div.querySelector('.pair-category').value.trim();
+            const can_use_to = div.querySelector('.pair-howto').value.trim();
+            if (category) {
+                pairs.push({
+                    category,
+                    can_use_to
+                });
+            }
+        });
+        document.getElementById('pairs_json').value = JSON.stringify(pairs);
+    }
+
+    // Pre-fill with existing data on page load
+    if (existingPairs.length > 0) {
+        existingPairs.forEach(p => addPair(p.category, p.can_use_to));
+    } else {
+        addPair();
+    }
 </script>
+
 <?php include('../constant/layout/footer.php'); ?>
