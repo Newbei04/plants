@@ -99,8 +99,9 @@ if (!$result) {
                                                 </div>
 
                                                 <div class="action-wrapper">
-                                                    <a href="del_categories.php?id=<?php echo $row['id']; ?>" class="action-btn"
-                                                        onclick="return confirm('Are you sure to delete this record?')">
+                                                    <a href="javascript:void(0);"
+                                                        class="action-btn delete-cat-btn"
+                                                        data-id="<?php echo $row['id']; ?>">
                                                         <button type="button" class="btn btn-danger">
                                                             <i class="fa fa-trash fa-fw"></i>
                                                         </button>
@@ -125,5 +126,26 @@ if (!$result) {
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelectorAll(".delete-cat-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            let id = this.getAttribute("data-id");
 
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This category will be permanently deleted.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "del_categories.php?id=" + id;
+                }
+            });
+        });
+    });
+</script>
 <?php include('../constant/layout/footer.php'); ?>

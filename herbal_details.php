@@ -7,7 +7,7 @@ if (isset($_GET['id'])) {
     $stmt = $con->prepare("SELECT * FROM herbal_details WHERE id = ?");
     $stmt->bind_param("i", $herbal_id);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $result       = $stmt->get_result();
     $herbalDetail = $result->fetch_assoc();
 
     if (!$herbalDetail) {
@@ -97,7 +97,6 @@ if (isset($_GET['id'])) {
             margin-top: 16px;
         }
 
-        /* ── Category dropdown ── */
         .category-select-wrapper {
             margin-top: 8px;
         }
@@ -124,7 +123,6 @@ if (isset($_GET['id'])) {
             border-color: #0f4a4b;
         }
 
-        /* ── How-to-use result box ── */
         #howto-display {
             display: none;
             margin-top: 14px;
@@ -158,8 +156,7 @@ if (isset($_GET['id'])) {
             }
         }
 
-        /* ── Trivia ── */
-        .trivia-box {
+        .info-box {
             margin-top: 8px;
             padding: 14px 18px;
             background: #fffbf0;
@@ -199,7 +196,7 @@ if (isset($_GET['id'])) {
                 max-width: 100%;
             }
 
-            .trivia-box {
+            .info-box {
                 max-width: 100%;
             }
         }
@@ -207,7 +204,6 @@ if (isset($_GET['id'])) {
 </head>
 
 <body>
-    <!--==================== HEADER ====================-->
     <header class="header" id="header">
         <nav class="nav container">
             <a href="#" class="nav__logo">
@@ -255,7 +251,7 @@ if (isset($_GET['id'])) {
             <hr>
 
             <!-- Category dropdown -->
-            <p class="info-label">Select a Category to see how to use</p>
+            <p class="info-label">Select a Category to see Remedy Instructions</p>
             <div class="category-select-wrapper">
                 <select id="category-select" onchange="showHowTo(this.value)">
                     <option value="">-- Choose a category --</option>
@@ -269,29 +265,31 @@ if (isset($_GET['id'])) {
                 </select>
             </div>
 
-            <!-- How-to-use result (shown after selection) -->
+            <!-- Remedy instructions result (shown after selection) -->
             <div id="howto-display">
                 <div class="howto-category-title" id="howto-title"></div>
                 <div id="howto-text"></div>
             </div>
 
             <hr>
+
+            <!-- How to Use — commented out for now -->
+            <!--
             <p class="info-label">How to Use</p>
-            <div class="trivia-box">
+            <div class="info-box">
                 <?php echo nl2br(htmlspecialchars($herbalDetail['how_to_use'])); ?>
             </div>
-
             <hr>
+            -->
 
             <p class="info-label">Trivia</p>
-            <div class="trivia-box">
+            <div class="info-box">
                 <?php echo nl2br(htmlspecialchars($herbalDetail['trivia'])); ?>
             </div>
 
         </div>
     </section>
 
-    <!-- Pairs data passed to JS -->
     <script>
         const pairs = <?php echo json_encode($pairs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
 
@@ -306,9 +304,7 @@ if (isset($_GET['id'])) {
             }
 
             const pair = pairs[index];
-
             titleEl.textContent = pair.category;
-            // Replace newlines with <br> for display
             textEl.innerHTML = pair.can_use_to ?
                 pair.can_use_to.replace(/\n/g, '<br>') :
                 '<em style="color:#999;">No instructions available.</em>';
@@ -317,7 +313,6 @@ if (isset($_GET['id'])) {
         }
     </script>
 
-    <!--==================== FOOTER ====================-->
     <footer class="footer section">
         <div class="footer__container container grid">
             <div class="footer__content">

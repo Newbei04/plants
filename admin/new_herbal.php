@@ -23,7 +23,7 @@
                 <div class="card">
                     <div class="card-body">
                         <form class="form-horizontal" action="connect1.php" method="post"
-                            enctype="multipart/form-data" onsubmit="buildJson()">
+                            enctype="multipart/form-data" onsubmit="return buildJson()">
 
                             <!-- Image -->
                             <div class="form-group">
@@ -60,16 +60,16 @@
                                 </div>
                             </div>
 
-                            <!-- Symptom + How to use pairs -->
+                            <!-- Symptom + Remedy Instructions pairs -->
                             <div class="form-group">
                                 <div class="row">
-                                    <label class="col-sm-3 control-label">Symptoms &amp; How to use:</label>
+                                    <label class="col-sm-3 control-label">Symptoms &amp; Remedy Instructions:</label>
                                     <div class="col-sm-9">
                                         <div id="pairs-wrapper"></div>
                                         <button type="button" class="btn btn-success btn-sm mt-2"
                                             onclick="addPair()">+ Add Symptom</button>
                                         <small class="form-text text-muted">
-                                            Each symptom has its own "how to use" description.
+                                            Each symptom has its own remedy instructions.
                                         </small>
                                     </div>
                                 </div>
@@ -78,7 +78,8 @@
                             <!-- Hidden JSON field — populated on submit -->
                             <input type="hidden" name="pairs_json" id="pairs_json">
 
-                            <!-- How to use -->
+                            <!-- How to use — commented out for now -->
+                            <!--
                             <div class="form-group">
                                 <div class="row">
                                     <label class="col-sm-3 control-label">How to use:</label>
@@ -88,7 +89,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
+                            -->
+
                             <!-- Trivia -->
                             <div class="form-group">
                                 <div class="row">
@@ -149,9 +151,9 @@
                 </select>
             </div>
             <div class="form-group mb-1">
-                <label class="control-label" style="font-size:13px;">How to use for this category</label>
+                <label class="control-label" style="font-size:13px;">Remedy Instructions</label>
                 <textarea class="form-control pair-howto" rows="2"
-                    placeholder="Describe how to use this plant for the selected category...">${howto}</textarea>
+                    placeholder="Describe the remedy instructions for the selected category...">${howto}</textarea>
             </div>
             ${id > 1
                 ? `<button type="button" class="btn btn-danger btn-sm"
@@ -173,6 +175,28 @@
                 });
             }
         });
+
+        // Validate — must have at least one valid pair
+        if (pairs.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Category',
+                text: 'Please add at least one symptom/category.'
+            });
+            return false; // stop form submission
+        }
+
+        // Validate — every selected category must have remedy instructions
+        const missing = pairs.find(p => p.can_use_to === '');
+        if (missing) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Remedy Instructions',
+                text: `Please enter remedy instructions for: "${missing.category}"`
+            });
+            return false; // stop form submission
+        }
+
         document.getElementById('pairs_json').value = JSON.stringify(pairs);
     }
 

@@ -71,7 +71,7 @@ if (!$result) {
                                 <th>Scientific Name</th>
                                 <th>Meaning</th>
                                 <th>Can Use To</th>
-                                <th>How to Use</th>
+                                <!-- <th>How to Use</th> --> <!-- commented out for now -->
                                 <th>Trivia</th>
                                 <th style="width: 10%;">Action</th>
                             </tr>
@@ -81,7 +81,7 @@ if (!$result) {
                             $sno = 1;
                             if (mysqli_num_rows($result) > 0):
                                 while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)):
-                                    $pairs   = json_decode($row['can_use_to'], true);
+                                    $pairs    = json_decode($row['can_use_to'], true);
                                     $hasPairs = is_array($pairs) && count($pairs) > 0;
                             ?>
                                     <tr>
@@ -100,8 +100,7 @@ if (!$result) {
                                         <!-- Meaning -->
                                         <td><?php echo htmlspecialchars($row['meaning']); ?></td>
 
-                                        <!-- Can Use To — category names only -->
-                                        <!-- Can Use To — category + its description -->
+                                        <!-- Can Use To — category + remedy instructions -->
                                         <td>
                                             <?php if ($hasPairs): ?>
                                                 <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
@@ -117,8 +116,10 @@ if (!$result) {
                                             <?php endif; ?>
                                         </td>
 
-                                        <!-- How to Use — general how_to_use column only -->
-                                        <td><?php echo nl2br(htmlspecialchars($row['how_to_use'] ?? '')); ?></td>
+                                        <!-- How to Use — commented out for now -->
+                                        <!--
+                                    <td><?php echo nl2br(htmlspecialchars($row['how_to_use'] ?? '')); ?></td>
+                                    -->
 
                                         <!-- Trivia -->
                                         <td><?php echo htmlspecialchars($row['trivia']); ?></td>
@@ -163,7 +164,7 @@ if (!$result) {
                                     $sno++;
                                 endwhile;
                             else:
-                                echo "<tr><td colspan='8'>No records found</td></tr>";
+                                echo "<tr><td colspan='6'>No records found</td></tr>";
                             endif;
                             ?>
                         </tbody>

@@ -1,9 +1,10 @@
 <?php
 session_start();
-include('../constant/layout/head.php');
-include('../constant/layout/header.php');
-include('../constant/layout/sidebar.php');
-include('../constant/connect.php');
+$base_path = file_exists('assets') ? './' : '../';
+include(__DIR__ . '/../constant/layout/head.php');
+include(__DIR__ . '/../constant/layout/header.php');
+include(__DIR__ . '/../constant/layout/sidebar.php');
+include(__DIR__ . '/../constant/connect.php');
 
 if (isset($_GET['id'])) {
     $id   = (int) $_GET['id'];
@@ -22,8 +23,8 @@ if (isset($_GET['id'])) {
 
     $scientificName = $row['scientific_name'];
 
-    // Explode the saved comma-separated string back into an array
-    $savedPlants = explode(',', $row['herbal_plant']);
+    // Trim each value after exploding to avoid space mismatch
+    $savedPlants = array_map('trim', explode(',', $row['herbal_plant']));
 } else {
     header("Location: manage_categories.php");
     exit();
@@ -68,10 +69,12 @@ if (isset($_GET['id'])) {
                                         <div class="col-sm-9">
 
                                             <!-- Search box -->
-                                            <input type="text" id="searchPlant" class="form-control mb-2" placeholder="Search plant...">
+                                            <input type="text" id="searchPlant" class="form-control mb-2"
+                                                placeholder="Search plant...">
 
                                             <!-- Scrollable checkbox list -->
-                                            <div id="plantCheckboxList" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
+                                            <div id="plantCheckboxList"
+                                                style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; border-radius: 4px; padding: 10px;">
                                                 <?php
                                                 $query         = "SELECT scientific_name FROM herbal_details ORDER BY scientific_name ASC";
                                                 $result_herbal = mysqli_query($con, $query);
@@ -79,12 +82,14 @@ if (isset($_GET['id'])) {
                                                 if ($result_herbal && mysqli_num_rows($result_herbal) > 0) {
                                                     while ($row_herbal = mysqli_fetch_assoc($result_herbal)) {
                                                         $val     = htmlspecialchars($row_herbal['scientific_name']);
-                                                        // Pre-check boxes that were previously saved
-                                                        $checked = in_array($row_herbal['scientific_name'], $savedPlants) ? 'checked' : '';
+                                                        $checked = in_array(trim($row_herbal['scientific_name']), $savedPlants) ? 'checked' : '';
                                                         echo '
                                                         <div class="plant-item form-check mb-1">
-                                                            <input class="form-check-input plant-checkbox" type="checkbox" name="herbal_plant[]" value="' . $val . '" id="plant_' . $val . '" ' . $checked . '>
-                                                            <label class="form-check-label" for="plant_' . $val . '">' . $val . '</label>
+                                                            <input class="form-check-input plant-checkbox" type="checkbox"
+                                                                name="herbal_plant[]" value="' . $val . '"
+                                                                id="plant_' . $val . '" ' . $checked . '>
+                                                            <label class="form-check-label" for="plant_' . $val . '">'
+                                                            . $val . '</label>
                                                         </div>';
                                                     }
                                                 } else {
@@ -95,15 +100,18 @@ if (isset($_GET['id'])) {
 
                                             <!-- Select All / Deselect All -->
                                             <div class="mt-2">
-                                                <button type="button" class="btn btn-sm btn-secondary" id="selectAll">Select All</button>
-                                                <button type="button" class="btn btn-sm btn-secondary" id="deselectAll">Deselect All</button>
+                                                <button type="button" class="btn btn-sm btn-secondary"
+                                                    id="selectAll">Select All</button>
+                                                <button type="button" class="btn btn-sm btn-secondary"
+                                                    id="deselectAll">Deselect All</button>
                                             </div>
 
                                         </div>
                                     </div>
                                 </div>
 
-                                <input type="submit" value="Update" class="btn btn-primary btn-flat m-b-30 m-t-30">
+                                <input type="submit" value="Update"
+                                    class="btn btn-primary btn-flat m-b-30 m-t-30">
 
                             </form>
                         </div>

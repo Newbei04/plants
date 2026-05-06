@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $scientificName = trim($_POST['scientificname'] ?? '');
     $meaning        = trim($_POST['meaning']        ?? '');
-    $howToUse       = trim($_POST['howtouse']       ?? '');
+    // $howToUse    = trim($_POST['howtouse']       ?? ''); // commented out for now
     $trivia         = trim($_POST['trivia']         ?? '');
     $value          = 0;
 
@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'can_use_to' => trim($p['can_use_to']  ?? '')
         ];
     }
-    // This is what gets stored in the DB column
     $canUseTo = json_encode($cleanPairs, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
     if (!$con) {
@@ -95,18 +94,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ========================= */
     $stmt = $con->prepare("
         INSERT INTO herbal_details
-            (scientific_name, meaning, can_use_to, how_to_use, trivia, image, value)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+            (scientific_name, meaning, can_use_to, trivia, image, value)
+        VALUES (?, ?, ?, ?, ?, ?)
     ");
 
     if (!$stmt) showError("Prepare failed: " . $con->error);
 
     $stmt->bind_param(
-        "ssssssi",
+        "sssssi",
         $scientificName,
         $meaning,
         $canUseTo,
-        $howToUse,
+        // $howToUse, // commented out for now
         $trivia,
         $webImagePath,
         $value
